@@ -1167,7 +1167,7 @@ const App: React.FC = () => {
       {/* Authentication Modal */}
       {showAuthModal && (
         <AuthModal
-          onSignIn={handleSignIn}
+          onSignIn={() => {}} // No longer used, but keeping for interface compatibility
           onEmailSignIn={handleEmailSignIn}
           onEmailSignUp={handleEmailSignUp}
           onCancel={() => setShowAuthModal(false)}
