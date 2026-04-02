@@ -17,6 +17,10 @@ export interface WidgetData {
   code: string; // The raw code string returned by Gemini
   prompt: string; // The original prompt
   createdAt: number;
+  updatedAt: number;
+  version: number; // Track edits
+  lastSaved: number; // Timestamp of last successful save
+  spaceId?: string; // For local storage association with spaces
 }
 
 export interface DragItem {

@@ -10,6 +10,7 @@ export interface Space {
   id: string;
   name: string;
   description?: string;
+  emoji?: string;
   ownerId: string;
   members: SpaceMember[];
   widgets: WidgetData[];

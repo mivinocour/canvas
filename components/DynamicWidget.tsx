@@ -11,9 +11,10 @@ declare global {
 interface DynamicWidgetProps {
   code: string;
   onError: (error: string) => void;
+  onReset?: () => void;
 }
 
-export const DynamicWidget = React.memo(({ code, onError }: DynamicWidgetProps) => {
+export const DynamicWidget = React.memo(({ code, onError, onReset }: DynamicWidgetProps) => {
   const [Component, setComponent] = useState<React.FC | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -87,6 +88,14 @@ ${code}
         <LucideIcons.AlertTriangle className="w-8 h-8 mb-2 flex-shrink-0" />
         <p className="text-sm font-semibold">Widget Crashed</p>
         <pre className="text-xs mt-2 opacity-75 whitespace-pre-wrap font-mono text-left w-full bg-red-100 p-2 rounded select-text">{error}</pre>
+        {onReset && (
+          <button
+            onClick={onReset}
+            className="mt-3 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs rounded-lg transition-colors font-medium"
+          >
+            Reset Widget
+          </button>
+        )}
       </div>
     );
   }
@@ -102,7 +111,10 @@ ${code}
   // Error boundary for rendering phase
   return (
     <div className="w-full h-full bg-white relative">
-        <ErrorBoundary onError={(msg) => setError(msg)}>
+        <ErrorBoundary
+          onError={(msg) => setError(msg)}
+          onReset={onReset}
+        >
         <Component />
         </ErrorBoundary>
     </div>
@@ -112,6 +124,7 @@ ${code}
 interface ErrorBoundaryProps {
   children: React.ReactNode;
   onError: (e: string) => void;
+  onReset?: () => void;
 }
 
 interface ErrorBoundaryState {
@@ -130,7 +143,27 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
   }
 
   render() {
-    if (this.state.hasError) return null;
+    if (this.state.hasError) {
+      // Don't return null - show the error UI instead
+      return (
+        <div className="flex flex-col items-center justify-center h-full p-4 text-center bg-red-50 text-red-600 overflow-auto no-drag">
+          <LucideIcons.AlertTriangle className="w-8 h-8 mb-2 flex-shrink-0" />
+          <p className="text-sm font-semibold">Widget Render Error</p>
+          <p className="text-xs mt-1 opacity-75">Component failed to render</p>
+          {this.props.onReset && (
+            <button
+              onClick={() => {
+                this.setState({ hasError: false });
+                this.props.onReset?.();
+              }}
+              className="mt-3 px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-xs rounded-lg transition-colors font-medium"
+            >
+              Reset Widget
+            </button>
+          )}
+        </div>
+      );
+    }
     return this.props.children;
   }
 }

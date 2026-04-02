@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Users, Lock, Globe, ChevronDown } from 'lucide-react';
+import { Plus, Users, Lock, Globe, ChevronDown, Mail } from 'lucide-react';
 import { Space, User } from '../types/shared';
 
 interface SpaceSelectorProps {
@@ -9,6 +9,8 @@ interface SpaceSelectorProps {
   onSpaceSelect: (space: Space) => void;
   onCreateSpace: (name: string, description?: string) => Promise<void>;
   onSignOut: () => void;
+  onUpdateSpaceEmoji?: (spaceId: string, emoji: string) => void;
+  onViewInvitations?: () => void;
 }
 
 export const SpaceSelector: React.FC<SpaceSelectorProps> = ({
@@ -17,13 +19,18 @@ export const SpaceSelector: React.FC<SpaceSelectorProps> = ({
   currentSpace,
   onSpaceSelect,
   onCreateSpace,
-  onSignOut
+  onSignOut,
+  onUpdateSpaceEmoji,
+  onViewInvitations
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newSpaceName, setNewSpaceName] = useState('');
   const [newSpaceDescription, setNewSpaceDescription] = useState('');
   const [creating, setCreating] = useState(false);
+  const [emojiEditingSpace, setEmojiEditingSpace] = useState<string | null>(null);
+
+  const emojis = ['🚀', '📝', '💼', '🎯', '📊', '🎨', '🔥', '⚡', '🌟', '💡', '🎪', '🍕', '🎮', '📚', '🏠', '❤️', '🌈', '🦋', '🍀', '🌙', '☀️', '🎵'];
 
   const handleCreateSpace = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +57,11 @@ export const SpaceSelector: React.FC<SpaceSelectorProps> = ({
           className="bg-white shadow-lg border border-slate-200 rounded-lg px-4 py-2 flex items-center gap-3 hover:shadow-xl transition-shadow"
         >
           <div className="flex items-center gap-2">
-            {user.photoURL ? (
+            {currentSpace ? (
+              <div className="w-6 h-6 flex items-center justify-center text-lg">
+                {currentSpace.emoji || '🚀'}
+              </div>
+            ) : user.photoURL ? (
               <img
                 src={user.photoURL}
                 alt={user.displayName}
@@ -63,9 +74,9 @@ export const SpaceSelector: React.FC<SpaceSelectorProps> = ({
             )}
             <div className="text-left">
               <p className="text-sm font-medium text-slate-800">
-                {currentSpace?.name || 'Select Space'}
+                Your Spaces
               </p>
-              <p className="text-xs text-slate-500">{user.displayName}</p>
+              <p className="text-xs text-slate-500">{user.displayName || user.email}</p>
             </div>
           </div>
           <ChevronDown className="w-4 h-4 text-slate-400" />
@@ -124,32 +135,54 @@ export const SpaceSelector: React.FC<SpaceSelectorProps> = ({
 
             <div className="max-h-64 overflow-y-auto">
               {spaces.map((space) => (
-                <button
+                <div
                   key={space.id}
-                  onClick={() => {
-                    onSpaceSelect(space);
-                    setIsOpen(false);
-                  }}
-                  className="w-full p-3 hover:bg-slate-50 text-left flex items-center gap-3 border-b border-slate-100 last:border-b-0"
+                  className="relative group"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-br from-pink-400 to-blue-500 rounded-lg flex items-center justify-center">
-                    {space.isPublic ? (
-                      <Globe className="w-4 h-4 text-white" />
-                    ) : (
-                      <Lock className="w-4 h-4 text-white" />
+                  <button
+                    onClick={() => {
+                      onSpaceSelect(space);
+                      setIsOpen(false);
+                    }}
+                    className="w-full p-3 hover:bg-slate-50 text-left flex items-center gap-3 border-b border-slate-100 last:border-b-0"
+                  >
+                    <div className="relative">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEmojiEditingSpace(emojiEditingSpace === space.id ? null : space.id);
+                        }}
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-lg hover:bg-slate-100 transition-colors"
+                        title="Click to change emoji"
+                      >
+                        {space.emoji || '🚀'}
+                      </button>
+                      {emojiEditingSpace === space.id && (
+                        <div className="absolute top-full left-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl p-2 z-50 grid grid-cols-6 gap-1 w-48">
+                          {emojis.map((emoji) => (
+                            <button
+                              key={emoji}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onUpdateSpaceEmoji?.(space.id, emoji);
+                                setEmojiEditingSpace(null);
+                              }}
+                              className="w-6 h-6 hover:bg-slate-100 rounded text-sm flex items-center justify-center transition-colors"
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-800">{space.name}</p>
+                    </div>
+                    {currentSpace?.id === space.id && (
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                     )}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-800">{space.name}</p>
-                    <p className="text-xs text-slate-500 flex items-center gap-1">
-                      <Users className="w-3 h-3" />
-                      {space.members.length} member{space.members.length !== 1 ? 's' : ''}
-                    </p>
-                  </div>
-                  {currentSpace?.id === space.id && (
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  )}
-                </button>
+                  </button>
+                </div>
               ))}
 
               {spaces.length === 0 && (
@@ -159,14 +192,29 @@ export const SpaceSelector: React.FC<SpaceSelectorProps> = ({
               )}
             </div>
 
-            <div className="p-3 border-t border-slate-100">
+            <div className="p-3 border-t border-slate-100 space-y-1">
+              {onViewInvitations && (
+                <button
+                  onClick={() => {
+                    onViewInvitations();
+                    setIsOpen(false);
+                  }}
+                  className="w-full text-left text-sm text-slate-600 hover:text-slate-800 px-1 flex items-center gap-2"
+                >
+                  <Mail className="w-4 h-4" />
+                  Invitations
+                </button>
+              )}
               <button
                 onClick={() => {
                   onSignOut();
                   setIsOpen(false);
                 }}
-                className="w-full text-left text-sm text-slate-600 hover:text-slate-800 px-1"
+                className="w-full text-left text-sm text-slate-600 hover:text-slate-800 px-1 flex items-center gap-2"
               >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
                 Sign out
               </button>
             </div>

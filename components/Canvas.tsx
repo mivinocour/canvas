@@ -9,9 +9,10 @@ interface CanvasProps {
   onUpdateWidget: (id: string, updates: Partial<WidgetData>) => void;
   onDeleteWidget: (id: string) => void;
   onEditWidget: (id: string, instruction: string) => Promise<void>;
+  onResetWidget?: (id: string) => void;
 }
 
-export const Canvas: React.FC<CanvasProps> = ({ widgets, onUpdateWidget, onDeleteWidget, onEditWidget }) => {
+export const Canvas: React.FC<CanvasProps> = ({ widgets, onUpdateWidget, onDeleteWidget, onEditWidget, onResetWidget }) => {
   const [pan, setPan] = useState<Position>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [isPanning, setIsPanning] = useState(false);
@@ -129,9 +130,10 @@ export const Canvas: React.FC<CanvasProps> = ({ widgets, onUpdateWidget, onDelet
             onDelete={onDeleteWidget}
             onEdit={onEditWidget}
           >
-            <DynamicWidget 
-                code={widget.code} 
-                onError={(err) => console.error(`Widget ${widget.id} error:`, err)} 
+            <DynamicWidget
+                code={widget.code}
+                onError={(err) => console.error(`Widget ${widget.id} error:`, err)}
+                onReset={onResetWidget ? () => onResetWidget(widget.id) : undefined}
             />
           </WidgetWindow>
         ))}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { storage } from '../lib/storage';
 import { Space, User } from '../types/shared';
 
 export function useSpaces(user: User | null) {
@@ -13,35 +14,18 @@ export function useSpaces(user: User | null) {
       return;
     }
 
-    // Fetch spaces where user is a member
+    // Fetch spaces owned by the user using storage layer (with immediate refresh on mount)
     const fetchSpaces = async () => {
-      const { data, error } = await supabase
-        .from('spaces')
-        .select('*')
-        .contains('member_ids', [user.id])
-        .order('updated_at', { ascending: false });
-
-      if (error) {
+      try {
+        console.log('useSpaces: Fetching spaces via storage layer...');
+        // Force refresh on mount to ensure immediate visibility
+        const spacesList = await storage.getSpaces(true);
+        setSpaces(spacesList);
+      } catch (error) {
         console.error('Error fetching spaces:', error);
+      } finally {
         setLoading(false);
-        return;
       }
-
-      const spacesList: Space[] = (data || []).map(space => ({
-        id: space.id,
-        name: space.name,
-        description: space.description,
-        ownerId: space.owner_id,
-        members: space.members || [],
-        widgets: space.widgets || [],
-        inviteCode: space.invite_code,
-        isPublic: space.is_public || false,
-        createdAt: new Date(space.created_at).getTime(),
-        updatedAt: new Date(space.updated_at).getTime()
-      }));
-
-      setSpaces(spacesList);
-      setLoading(false);
     };
 
     fetchSpaces();
@@ -55,7 +39,7 @@ export function useSpaces(user: User | null) {
           event: '*',
           schema: 'public',
           table: 'spaces',
-          filter: `member_ids.cs.{${user.id}}`
+          filter: `user_id=eq.${user.id}`
         },
         () => {
           fetchSpaces(); // Refetch on any change
@@ -68,26 +52,13 @@ export function useSpaces(user: User | null) {
     };
   }, [user]);
 
-  const createSpace = async (name: string, description?: string, initialWidgets?: any[]): Promise<string> => {
+  const createSpace = async (name: string, description?: string, initialWidgets?: any[], emoji?: string): Promise<string> => {
     if (!user) throw new Error('User must be logged in');
-
-    const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
 
     const spaceData = {
       name,
-      description,
-      owner_id: user.id,
-      member_ids: [user.id],
-      members: [{
-        userId: user.id,
-        role: 'owner',
-        joinedAt: Date.now(),
-        displayName: user.displayName,
-        photoURL: user.photoURL
-      }],
-      widgets: initialWidgets || [],
-      invite_code: inviteCode,
-      is_public: false
+      description: description || null,
+      user_id: user.id
     };
 
     const { data, error } = await supabase

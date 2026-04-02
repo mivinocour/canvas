@@ -35,14 +35,7 @@ export function useAuth() {
           createdAt: new Date(session.user.created_at).getTime()
         };
 
-        // Upsert user data to database
-        await supabase.from('users').upsert({
-          id: userData.id,
-          email: userData.email,
-          display_name: userData.displayName,
-          photo_url: userData.photoURL,
-          created_at: new Date(session.user.created_at).toISOString()
-        });
+        // User data is managed by Supabase auth - no need to duplicate in custom table
 
         setUser(userData);
       } else {
@@ -69,6 +62,61 @@ export function useAuth() {
     }
   };
 
+  const signUp = async (email: string, password: string, fullName?: string) => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: fullName ? {
+          data: {
+            full_name: fullName
+          }
+        } : undefined
+      });
+
+      if (error) throw error;
+
+      return {
+        success: true,
+        needsConfirmation: !data.user?.email_confirmed_at,
+        user: data.user
+      };
+    } catch (error: any) {
+      console.error('Error signing up:', error);
+      throw error;
+    }
+  };
+
+  const updateUserProfile = async (fullName: string) => {
+    try {
+      const { data, error } = await supabase.auth.updateUser({
+        data: { full_name: fullName }
+      });
+
+      if (error) throw error;
+      return { success: true };
+    } catch (error: any) {
+      console.error('Error updating user profile:', error);
+      throw error;
+    }
+  };
+
+  const signIn = async (email: string, password: string) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      return { success: true, user: data.user };
+    } catch (error: any) {
+      console.error('Error signing in:', error);
+      throw error;
+    }
+  };
+
   const signOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -83,6 +131,9 @@ export function useAuth() {
     user,
     loading,
     signInWithGoogle,
-    signOut
+    signUp,
+    signIn,
+    signOut,
+    updateUserProfile
   };
 }
