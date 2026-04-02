@@ -836,12 +836,19 @@ const App: React.FC = () => {
       {/* Welcome Modal - Empty State */}
       {/* Only show welcome screen if no space is selected and no widgets exist and no other modals are open */}
       {(() => {
-        const shouldShow = widgets.length === 0 && !isGenerating && !currentSpace && !showSpaceNamingModal;
+        const shouldShow = widgets.length === 0 && !isGenerating && !currentSpace && !showSpaceNamingModal && !showAuthModal && !showNamePrompt && !showInviteModal && !showInvitationDashboard && !showEmojiPicker && !showFirstWidgetPrompt && !invitationId;
         console.log('Welcome modal should show:', shouldShow, {
           widgetsLength: widgets.length,
           isGenerating,
           currentSpace: currentSpace?.name || null,
-          showSpaceNamingModal
+          showSpaceNamingModal,
+          showAuthModal,
+          showNamePrompt,
+          showInviteModal,
+          showInvitationDashboard,
+          showEmojiPicker,
+          showFirstWidgetPrompt,
+          invitationId: !!invitationId
         });
         return shouldShow;
       })() && (
