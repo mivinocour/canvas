@@ -313,7 +313,39 @@ const App: React.FC = () => {
     try {
       const invitation = await supabaseService.createInvitation(currentSpace.id, email, role);
       if (invitation) {
-        console.log('Invitation sent successfully to:', email);
+        console.log('Invitation created successfully for:', email);
+
+        // Generate invitation link
+        const invitationLink = `${window.location.origin}?invite=${invitation.id}`;
+
+        // Send email invitation
+        try {
+          const response = await fetch('/api/send-invitation', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              to: email,
+              inviterName: user.displayName || user.email,
+              spaceName: currentSpace.name,
+              invitationLink,
+              role
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.warn('Failed to send email:', errorData.error);
+            // Don't throw error - invitation was created successfully, email is just a bonus
+          } else {
+            console.log('Email invitation sent successfully to:', email);
+          }
+        } catch (emailError) {
+          console.warn('Failed to send email invitation:', emailError);
+          // Don't throw error - invitation was created successfully
+        }
+
         return invitation.id; // Return invitation ID for link generation
       }
     } catch (error: any) {
