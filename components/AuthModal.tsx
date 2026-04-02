@@ -242,20 +242,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </button>
         </div>
 
-        <div className="text-center">
-          {onCancel && (
-            <button
-              onClick={onCancel}
-              className="text-slate-600 hover:text-slate-800 text-sm font-medium underline underline-offset-4"
-            >
-              Continue without signing in
-            </button>
-          )}
-        </div>
-
-        <p className="text-xs text-slate-500 mt-4">
-          You can use Playground without signing in, but you won't be able to save or share spaces.
-        </p>
       </div>
     </div>
   );
