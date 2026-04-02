@@ -211,6 +211,13 @@ const App: React.FC = () => {
   }, [user]);
 
   const handleCreateWidget = async (prompt: string) => {
+    // If user is not signed in, show auth modal instead of generating
+    if (!user) {
+      console.log('User not signed in, showing auth modal');
+      setShowAuthModal(true);
+      return;
+    }
+
     setIsGenerating(true);
     try {
       const code = await generateWidgetCode(prompt);
