@@ -64,8 +64,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   if (mode === 'signin' || mode === 'signup') {
     return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" style={{zIndex: 1000}}>
-        <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-8" style={{minHeight: '200px', backgroundColor: 'white', border: '2px solid blue'}}>
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-8">
           <div className="text-center mb-6">
             <Mail className="w-12 h-12 mx-auto mb-4 text-blue-600" />
             <h1 className="text-2xl font-semibold text-slate-800 mb-2">
@@ -198,8 +198,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   // Main auth selection screen
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" style={{zIndex: 1000}}>
-      <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-8 text-center" style={{minHeight: '200px', backgroundColor: 'white', border: '2px solid red'}}>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-8 text-center">
         <div className="w-16 h-16 mx-auto mb-6 relative">
           <div className="absolute inset-0 bg-gradient-to-br from-pink-400 via-blue-400 to-green-400 rounded-xl transform rotate-3 opacity-80"></div>
           <div className="absolute inset-0.5 bg-gradient-to-tl from-pink-300 via-purple-300 to-blue-300 rounded-lg transform -rotate-2"></div>
