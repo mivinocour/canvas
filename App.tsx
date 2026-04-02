@@ -15,7 +15,7 @@ import { WidgetData as SharedWidgetData, Space, Invitation } from './types/share
 import { supabaseService } from './lib/supabase-service';
 import { useAuth } from './hooks/useAuth';
 import { useSpaces } from './hooks/useSpaces';
-import { generateWidgetCode, updateWidgetCode } from './services/geminiService';
+import { generateWidgetCode, updateWidgetCode } from './services/geminiApiService';
 import { storage } from './lib/storage';
 
 const App: React.FC = () => {
