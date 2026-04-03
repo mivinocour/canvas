@@ -42,39 +42,30 @@ ${existingCode}
 Please provide the updated component code. Make sure to:
 1. Keep the same component structure and props
 2. IMPORTANT: Do NOT use import statements. React hooks (useState, useEffect, etc.) and Icons (from Lucide) are already available in scope
-3. IMPORTANT: Do NOT use TypeScript syntax like type annotations (:type) or interfaces - use plain JavaScript
-4. IMPORTANT: Do NOT use object spread syntax (...). Use Object.assign() instead. For example, use Object.assign({}, obj, { newProp: value }) instead of { ...obj, newProp: value }
-5. Use Tailwind CSS for styling
-6. Make the component self-contained and functional
-7. End your code with "return ComponentName;" where ComponentName is your component function
-8. Only return the JSX code, no explanations
+3. Use Tailwind CSS for styling
+4. Make the component self-contained and functional
+5. End your code with "return ComponentName;" where ComponentName is your component function
+6. Only return the JSX code, no explanations
 
 Updated component:`;
     } else {
       fullPrompt = `Create a React component for: "${prompt}"
 
 Please create a complete, functional React component that:
-1. Uses plain JavaScript (no TypeScript syntax or type annotations)
+1. Uses TypeScript
 2. Uses Tailwind CSS for styling
 3. Is interactive and engaging
-4. Uses React hooks when appropriate (useState, useEffect, useCallback, useMemo, useRef)
-5. Is self-contained and doesn't require external dependencies beyond React
-6. IMPORTANT: Do NOT use import statements. React hooks (useState, useEffect, etc.) and Icons (from Lucide) are already available in scope
-7. IMPORTANT: Do NOT use TypeScript syntax like type annotations (:type) or interfaces
-8. IMPORTANT: Do NOT use object spread syntax (...). Use Object.assign() instead. For example, use Object.assign({}, obj, { newProp: value }) instead of { ...obj, newProp: value }
-9. Use standard JavaScript features only - avoid modern syntax that needs transpilation
-10. End your code with "return ComponentName;" where ComponentName is your component function
-11. Only return the JSX code, no explanations
+4. Includes proper props interface if needed
+5. Uses React hooks when appropriate
+6. Is self-contained and doesn't require external dependencies beyond React
+7. IMPORTANT: Do NOT use import statements. React hooks (useState, useEffect, etc.) and Icons (from Lucide) are already available in scope
+8. End your code with "return ComponentName;" where ComponentName is your component function
+9. Only return the JSX code, no explanations
 
 Example format:
 const MyComponent = ({ title, initialCount }) => {
   const [count, setCount] = useState(initialCount || 0);
-  const updateItem = (id, changes) => {
-    // Use Object.assign instead of spread
-    setItems(items.map(item =>
-      item.id === id ? Object.assign({}, item, changes) : item
-    ));
-  };
+  // ... component logic
   return <div>...</div>;
 };
 
@@ -92,14 +83,6 @@ Component code:`;
 
     // Remove any import statements that might have been generated
     code = code.replace(/^import.*?;\n/gm, '').trim();
-
-    // Remove TypeScript syntax that might have been generated
-    // Remove type annotations from function parameters like `: string` or `: number`
-    code = code.replace(/:\s*\w+(\[\])?\s*(?=[,)}>])/g, '');
-    // Remove interface declarations
-    code = code.replace(/^interface\s+\w+\s*{[^}]*}$/gm, '').trim();
-    // Remove type annotations from variables like `const x: string =`
-    code = code.replace(/:\s*\w+(\[\])?\s*(?==)/g, '');
 
     res.status(200).json({ code });
   } catch (error) {
