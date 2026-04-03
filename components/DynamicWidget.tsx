@@ -55,8 +55,8 @@ ${code}
 
       // 3. Create the factory function
       // We inject dependencies into the function scope manually
-      const scopeKeys = ['React', 'useState', 'useEffect', 'useRef', 'useCallback', 'useMemo', 'Icons'];
-      const scopeValues = [React, React.useState, React.useEffect, React.useRef, React.useCallback, React.useMemo, LucideIcons];
+      const scopeKeys = ['React', 'useState', 'useEffect', 'useRef', 'useCallback', 'useMemo', 'Icons', ...Object.keys(LucideIcons)];
+      const scopeValues = [React, React.useState, React.useEffect, React.useRef, React.useCallback, React.useMemo, LucideIcons, ...Object.values(LucideIcons)];
 
       // 4. Execute to get the React Component
       const factory = new Function(...scopeKeys, `return ${transpiled};`);
