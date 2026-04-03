@@ -31,25 +31,57 @@ export const DynamicWidget = React.memo(({ code, onError, onReset }: DynamicWidg
     if (!code) return;
 
     try {
-      // 1. Wrap the code in an IIFE (Immediately Invoked Function Expression)
+      // 1. Preprocess the code to handle problematic syntax
+      let preprocessedCode = code;
+
+      // Transform object spread syntax to Object.assign as a fallback
+      // This regex finds patterns like { ...obj, prop: value } and converts them
+      preprocessedCode = preprocessedCode.replace(
+        /\{\s*\.\.\.([^,}]+),\s*([^}]+)\s*\}/g,
+        'Object.assign({}, $1, { $2 })'
+      );
+
+      // 2. Wrap the code in an IIFE (Immediately Invoked Function Expression)
       // This is crucial because the AI generates code like "const App = ...; return App;"
       // A top-level 'return' is invalid JS syntax unless inside a function.
       const wrappedCode = `(() => {
-${code}
+${preprocessedCode}
 })()`;
 
-      // 2. Transpile JSX using Babel Standalone
+      // 3. Transpile JSX using Babel Standalone
       if (!window.Babel) {
         throw new Error("Babel compiler not loaded");
       }
 
-      // 'allowReturnOutsideFunction' allows us to use the 'return Component' pattern safely before we wrap it
-      // though our manual wrapping above also handles it, this is a safety net for the parser.
-      const transformResult = window.Babel.transform(wrappedCode, {
-        presets: [['react', { runtime: 'classic' }]],
-        parserOpts: { allowReturnOutsideFunction: true },
-        filename: 'widget.js',
-      });
+      // Try advanced Babel configuration first, fall back to basic if it fails
+      let transformResult;
+      try {
+        transformResult = window.Babel.transform(wrappedCode, {
+          presets: [
+            ['env', { modules: false }],
+            ['react', { runtime: 'classic' }]
+          ],
+          parserOpts: {
+            allowReturnOutsideFunction: true,
+            plugins: ['jsx', 'objectRestSpread', 'functionBind']
+          },
+          filename: 'widget.js',
+        });
+      } catch (advancedError) {
+        console.warn('Advanced Babel config failed, falling back to basic:', advancedError);
+        try {
+          transformResult = window.Babel.transform(wrappedCode, {
+            presets: [['react', { runtime: 'classic' }]],
+            parserOpts: {
+              allowReturnOutsideFunction: true,
+              plugins: ['jsx', 'objectRestSpread']
+            },
+            filename: 'widget.js',
+          });
+        } catch (basicError) {
+          throw new Error(`Babel transformation failed: ${basicError.message}`);
+        }
+      }
 
       const transpiled = transformResult.code;
 

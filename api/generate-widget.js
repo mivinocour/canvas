@@ -43,10 +43,11 @@ Please provide the updated component code. Make sure to:
 1. Keep the same component structure and props
 2. IMPORTANT: Do NOT use import statements. React hooks (useState, useEffect, etc.) and Icons (from Lucide) are already available in scope
 3. IMPORTANT: Do NOT use TypeScript syntax like type annotations (:type) or interfaces - use plain JavaScript
-4. Use Tailwind CSS for styling
-5. Make the component self-contained and functional
-6. End your code with "return ComponentName;" where ComponentName is your component function
-7. Only return the JSX code, no explanations
+4. IMPORTANT: Do NOT use object spread syntax (...). Use Object.assign() instead. For example, use Object.assign({}, obj, { newProp: value }) instead of { ...obj, newProp: value }
+5. Use Tailwind CSS for styling
+6. Make the component self-contained and functional
+7. End your code with "return ComponentName;" where ComponentName is your component function
+8. Only return the JSX code, no explanations
 
 Updated component:`;
     } else {
@@ -60,13 +61,20 @@ Please create a complete, functional React component that:
 5. Is self-contained and doesn't require external dependencies beyond React
 6. IMPORTANT: Do NOT use import statements. React hooks (useState, useEffect, etc.) and Icons (from Lucide) are already available in scope
 7. IMPORTANT: Do NOT use TypeScript syntax like type annotations (:type) or interfaces
-8. End your code with "return ComponentName;" where ComponentName is your component function
-9. Only return the JSX code, no explanations
+8. IMPORTANT: Do NOT use object spread syntax (...). Use Object.assign() instead. For example, use Object.assign({}, obj, { newProp: value }) instead of { ...obj, newProp: value }
+9. Use standard JavaScript features only - avoid modern syntax that needs transpilation
+10. End your code with "return ComponentName;" where ComponentName is your component function
+11. Only return the JSX code, no explanations
 
 Example format:
 const MyComponent = ({ title, initialCount }) => {
   const [count, setCount] = useState(initialCount || 0);
-  // ... component logic
+  const updateItem = (id, changes) => {
+    // Use Object.assign instead of spread
+    setItems(items.map(item =>
+      item.id === id ? Object.assign({}, item, changes) : item
+    ));
+  };
   return <div>...</div>;
 };
 
