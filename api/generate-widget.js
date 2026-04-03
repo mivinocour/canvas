@@ -41,10 +41,11 @@ ${existingCode}
 
 Please provide the updated component code. Make sure to:
 1. Keep the same component structure and props
-2. Import React and any necessary hooks
+2. IMPORTANT: Do NOT use import statements. React hooks (useState, useEffect, etc.) and Icons (from Lucide) are already available in scope
 3. Use Tailwind CSS for styling
 4. Make the component self-contained and functional
-5. Only return the JSX code, no explanations
+5. End your code with "return ComponentName;" where ComponentName is your component function
+6. Only return the JSX code, no explanations
 
 Updated component:`;
     } else {
@@ -55,9 +56,20 @@ Please create a complete, functional React component that:
 2. Uses Tailwind CSS for styling
 3. Is interactive and engaging
 4. Includes proper props interface if needed
-5. Uses React hooks when appropriate
+5. Uses React hooks when appropriate (useState, useEffect, useCallback, useMemo, useRef)
 6. Is self-contained and doesn't require external dependencies beyond React
-7. Only return the JSX code, no explanations
+7. IMPORTANT: Do NOT use import statements. React hooks (useState, useEffect, etc.) and Icons (from Lucide) are already available in scope
+8. End your code with "return ComponentName;" where ComponentName is your component function
+9. Only return the JSX code, no explanations
+
+Example format:
+const MyComponent = () => {
+  const [count, setCount] = useState(0);
+  // ... component logic
+  return <div>...</div>;
+};
+
+return MyComponent;
 
 Component code:`;
     }
@@ -69,10 +81,8 @@ Component code:`;
     // Clean up the response to extract just the code
     code = code.replace(/```tsx?/g, '').replace(/```/g, '').trim();
 
-    // Ensure the code starts with proper imports and component structure
-    if (!code.includes('import React') && !code.includes('React.')) {
-      code = `import React from 'react';\n\n${code}`;
-    }
+    // Remove any import statements that might have been generated
+    code = code.replace(/^import.*?;\n/gm, '').trim();
 
     res.status(200).json({ code });
   } catch (error) {
