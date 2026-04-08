@@ -2,7 +2,10 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Models to try in order. The first one that returns a successful response wins.
 // We list multiple to be resilient to model name changes / availability issues.
+// Primary is the latest Gemini 3 Flash Preview; if it's unavailable for the
+// project / region we automatically fall back to known-good models.
 const MODEL_CANDIDATES = [
+  'gemini-3-flash-preview',
   'gemini-2.5-flash',
   'gemini-2.0-flash',
   'gemini-1.5-flash-latest',
