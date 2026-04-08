@@ -41,7 +41,7 @@ ${existingCode}
 
 Please provide the updated component code. Make sure to:
 1. Keep the same component structure and props
-2. Use TypeScript
+2. IMPORTANT: Do NOT use import statements. React hooks (useState, useEffect, etc.) and Icons (from Lucide) are already available in scope
 3. Use Tailwind CSS for styling
 4. Make the component self-contained and functional
 5. End your code with "return ComponentName;" where ComponentName is your component function
@@ -52,7 +52,7 @@ Updated component:`;
       fullPrompt = `Create a React component for: "${prompt}"
 
 Please create a complete, functional React component that:
-1. Uses TypeScript
+1. IMPORTANT: Do NOT use import statements. React hooks (useState, useEffect, etc.) and Icons (from Lucide) are already available in scope
 2. Uses Tailwind CSS for beautiful styling
 3. Is interactive and engaging
 4. End your code with "return ComponentName;" where ComponentName is your component function
@@ -68,6 +68,9 @@ Component code:`;
 
     // Clean up the response to extract just the code
     code = code.replace(/```tsx?/g, '').replace(/```jsx?/g, '').replace(/```/g, '').trim();
+
+    // Remove any import statements that might have been generated
+    code = code.replace(/^import.*?;\n?/gm, '').trim();
 
     res.status(200).json({ code });
   } catch (error) {
