@@ -2,7 +2,7 @@
 
 export const generateWidgetCode = async (prompt: string): Promise<string> => {
   try {
-    const response = await fetch('/api/generate-widget', {
+    const response = await fetch('https://canvas-plum-seven.vercel.app/api/generate-widget', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -25,7 +25,7 @@ export const generateWidgetCode = async (prompt: string): Promise<string> => {
 
 export const updateWidgetCode = async (prompt: string, existingCode: string): Promise<string> => {
   try {
-    const response = await fetch('/api/generate-widget', {
+    const response = await fetch('https://canvas-plum-seven.vercel.app/api/generate-widget', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

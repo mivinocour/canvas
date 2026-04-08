@@ -53,7 +53,7 @@ const App: React.FC = () => {
 
     for (const space of spacesList) {
       try {
-        const spaceWidgets = await storage.getSpaceWidgets(space.id);
+        const spaceWidgets = await storage.getWidgetsBySpace(space.id);
         counts[space.id] = spaceWidgets.length;
       } catch (error) {
         console.error(`Failed to load widget count for space ${space.id}:`, error);

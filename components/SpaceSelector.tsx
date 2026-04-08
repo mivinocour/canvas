@@ -139,12 +139,12 @@ export const SpaceSelector: React.FC<SpaceSelectorProps> = ({
                   key={space.id}
                   className="relative group"
                 >
-                  <button
+                  <div
                     onClick={() => {
                       onSpaceSelect(space);
                       setIsOpen(false);
                     }}
-                    className="w-full p-3 hover:bg-slate-50 text-left flex items-center gap-3 border-b border-slate-100 last:border-b-0"
+                    className="w-full p-3 hover:bg-slate-50 text-left flex items-center gap-3 border-b border-slate-100 last:border-b-0 cursor-pointer"
                   >
                     <div className="relative">
                       <button
@@ -181,7 +181,7 @@ export const SpaceSelector: React.FC<SpaceSelectorProps> = ({
                     {currentSpace?.id === space.id && (
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                     )}
-                  </button>
+                  </div>
                 </div>
               ))}
 
