@@ -45,10 +45,17 @@ ${code}
 
       // 'allowReturnOutsideFunction' allows us to use the 'return Component' pattern safely before we wrap it
       // though our manual wrapping above also handles it, this is a safety net for the parser.
+      // We include the TypeScript preset so any TS annotations the model emits (e.g. `useState<number>`,
+      // `: React.FC`, type assertions) are stripped instead of crashing the parser.
+      // Babel preset ordering is reversed (last → first), so listing typescript LAST means
+      // it runs FIRST, stripping types, then the React preset converts JSX.
       const transformResult = window.Babel.transform(wrappedCode, {
-        presets: [['react', { runtime: 'classic' }]],
+        presets: [
+          ['react', { runtime: 'classic' }],
+          ['typescript', { isTSX: true, allExtensions: true, allowDeclareFields: true }],
+        ],
         parserOpts: { allowReturnOutsideFunction: true },
-        filename: 'widget.js',
+        filename: 'widget.tsx',
       });
 
       const transpiled = transformResult.code;
