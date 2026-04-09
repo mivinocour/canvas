@@ -68,6 +68,24 @@ export function useSpaces(user: User | null) {
       .single();
 
     if (error) throw error;
+
+    // Immediately update local state to show the space right away
+    const newSpace: Space = {
+      id: data.id,
+      name: data.name,
+      description: data.description,
+      ownerId: data.user_id,
+      members: [],
+      widgets: initialWidgets || [],
+      inviteCode: '',
+      isPublic: data.is_public || false,
+      createdAt: new Date(data.created_at).getTime(),
+      updatedAt: new Date(data.updated_at).getTime(),
+      emoji: emoji
+    };
+
+    setSpaces(currentSpaces => [...currentSpaces, newSpace]);
+
     return data.id;
   };
 
@@ -86,6 +104,13 @@ export function useSpaces(user: User | null) {
       .eq('id', spaceId);
 
     if (error) throw error;
+
+    // Immediately update local state
+    setSpaces(currentSpaces =>
+      currentSpaces.map(space =>
+        space.id === spaceId ? { ...space, ...updates } : space
+      )
+    );
   };
 
   const deleteSpace = async (spaceId: string) => {
@@ -95,6 +120,9 @@ export function useSpaces(user: User | null) {
       .eq('id', spaceId);
 
     if (error) throw error;
+
+    // Immediately update local state
+    setSpaces(currentSpaces => currentSpaces.filter(space => space.id !== spaceId));
   };
 
   return {
