@@ -42,10 +42,11 @@ ${existingCode}
 Please provide the updated component code. Make sure to:
 1. Keep the same component structure and props
 2. IMPORTANT: Do NOT use import statements. React hooks (useState, useEffect, etc.) and Icons (from Lucide) are already available in scope
-3. Use Tailwind CSS for styling
-4. Make the component self-contained and functional
-5. End your code with "return ComponentName;" where ComponentName is your component function
-6. Only return the JSX code, no explanations
+3. Preserve existing data persistence using saveData(data) and loadData() if present
+4. Use Tailwind CSS for styling
+5. Make the component self-contained and functional
+6. End your code with "return ComponentName;" where ComponentName is your component function
+7. Only return the JSX code, no explanations
 
 Updated component:`;
     } else {
@@ -53,11 +54,25 @@ Updated component:`;
 
 Please create a complete, functional React component that:
 1. IMPORTANT: Do NOT use import statements. React hooks (useState, useEffect, etc.) and Icons (from Lucide) are already available in scope
-2. Uses Tailwind CSS for beautiful styling
-3. Is interactive and engaging
-4. End your code with "return ComponentName;" where ComponentName is your component function
-5. Only return the JSX code, no explanations
-6. Write clean, well-structured code
+2. Use saveData(data) to persist any user input/state across sessions and loadData() to retrieve saved data on component mount
+3. Uses Tailwind CSS for beautiful styling
+4. Is interactive and engaging
+5. End your code with "return ComponentName;" where ComponentName is your component function
+6. Only return the JSX code, no explanations
+7. Write clean, well-structured code
+
+Example data persistence pattern:
+const MyComponent = () => {
+  const [items, setItems] = useState(loadData() || []);
+
+  const addItem = (item) => {
+    const newItems = [...items, item];
+    setItems(newItems);
+    saveData(newItems);
+  };
+
+  return <div>...</div>;
+};
 
 Component code:`;
     }

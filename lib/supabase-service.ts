@@ -308,6 +308,7 @@ export class SupabaseService {
       updateData.height = Math.round(updates.size.height);
     }
     if (updates.code) updateData.custom_code = updates.code;
+    if (updates.data !== undefined) updateData.data = updates.data;
 
     const { data, error } = await supabase
       .from('widget_instances')
@@ -631,6 +632,7 @@ export class SupabaseService {
       },
       code: dbWidget.custom_code || '',
       prompt: 'Generated widget', // We'd need to join with template to get original prompt
+      data: dbWidget.data || null,
       createdAt: new Date(dbWidget.created_at).getTime(),
       updatedAt: new Date(dbWidget.updated_at).getTime(),
       version: dbWidget.version,

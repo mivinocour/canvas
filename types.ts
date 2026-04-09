@@ -16,6 +16,7 @@ export interface WidgetData {
   size: Size;
   code: string; // The raw code string returned by Gemini
   prompt: string; // The original prompt
+  data?: any; // Persistent widget state data (e.g., todo items, form data, etc.)
   createdAt: number;
   updatedAt: number;
   version: number; // Track edits

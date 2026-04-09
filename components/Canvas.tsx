@@ -132,8 +132,10 @@ export const Canvas: React.FC<CanvasProps> = ({ widgets, onUpdateWidget, onDelet
           >
             <DynamicWidget
                 code={widget.code}
+                data={widget.data}
                 onError={(err) => console.error(`Widget ${widget.id} error:`, err)}
                 onReset={onResetWidget ? () => onResetWidget(widget.id) : undefined}
+                onDataChange={(newData) => onUpdateWidget(widget.id, { data: newData })}
             />
           </WidgetWindow>
         ))}

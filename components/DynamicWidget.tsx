@@ -10,11 +10,13 @@ declare global {
 
 interface DynamicWidgetProps {
   code: string;
+  data?: any;
   onError: (error: string) => void;
   onReset?: () => void;
+  onDataChange?: (data: any) => void;
 }
 
-export const DynamicWidget = React.memo(({ code, onError, onReset }: DynamicWidgetProps) => {
+export const DynamicWidget = React.memo(({ code, data, onError, onReset, onDataChange }: DynamicWidgetProps) => {
   const [Component, setComponent] = useState<React.FC | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,8 +57,16 @@ ${code}
 
       // 3. Create the factory function
       // We inject dependencies into the function scope manually
-      const scopeKeys = ['React', 'useState', 'useEffect', 'useRef', 'useCallback', 'useMemo', 'Icons', ...Object.keys(LucideIcons)];
-      const scopeValues = [React, React.useState, React.useEffect, React.useRef, React.useCallback, React.useMemo, LucideIcons, ...Object.values(LucideIcons)];
+
+      // Create data persistence functions for the widget
+      const saveData = onDataChange ? (newData: any) => {
+        onDataChange(newData);
+      } : () => {};
+
+      const loadData = () => data || null;
+
+      const scopeKeys = ['React', 'useState', 'useEffect', 'useRef', 'useCallback', 'useMemo', 'Icons', 'saveData', 'loadData', ...Object.keys(LucideIcons)];
+      const scopeValues = [React, React.useState, React.useEffect, React.useRef, React.useCallback, React.useMemo, LucideIcons, saveData, loadData, ...Object.values(LucideIcons)];
 
       // 4. Execute to get the React Component
       const factory = new Function(...scopeKeys, `return ${transpiled};`);
