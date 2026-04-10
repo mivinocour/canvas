@@ -163,7 +163,22 @@ const App: React.FC = () => {
         if (currentSpace) {
           // Load widgets from current space via storage layer
           const spaceWidgets = await storage.getWidgetsBySpace(currentSpace.id);
-          setWidgets(spaceWidgets);
+          // Deduplicate widgets by ID to prevent duplicates
+          const uniqueWidgets = spaceWidgets.reduce((acc, widget) => {
+            const existingIndex = acc.findIndex(w => w.id === widget.id);
+            if (existingIndex >= 0) {
+              // Keep the most recently updated version
+              if (widget.updatedAt > acc[existingIndex].updatedAt) {
+                acc[existingIndex] = widget;
+              }
+            } else {
+              acc.push(widget);
+            }
+            return acc;
+          }, [] as WidgetData[]);
+
+          console.log(`Loaded ${uniqueWidgets.length} widgets for space ${currentSpace.name}`);
+          setWidgets(uniqueWidgets);
         } else if (!user) {
           // Load from local storage when not authenticated and no space selected
           const localWidgets = storage.getWidgetsLocal();
@@ -273,24 +288,49 @@ const App: React.FC = () => {
 
     if (isPositionOrSizeUpdate) {
       // Use local-only save for position/size changes (better performance)
-      console.log('Local-only save for widget position/size update');
+      console.log('Local-only save for widget position/size update:', id);
       storage.saveWidgetLocal(newWidgetData, spaceId);
     } else {
       // Use full save for content changes (code, name, prompt)
-      console.log('Full save for widget content update');
+      console.log('Full save for widget content update:', id);
       await storage.saveWidget(newWidgetData, spaceId);
     }
 
-    // Update local state
-    setWidgets(prevWidgets => prevWidgets.map(w => w.id === id ? newWidgetData : w));
+    // Update local state - ensure no duplicates
+    setWidgets(prevWidgets => {
+      const updated = prevWidgets.map(w => w.id === id ? newWidgetData : w);
+      const uniqueWidgets = updated.reduce((acc, widget) => {
+        const existingIndex = acc.findIndex(w => w.id === widget.id);
+        if (existingIndex === -1) {
+          acc.push(widget);
+        }
+        return acc;
+      }, [] as WidgetData[]);
+
+      if (uniqueWidgets.length !== updated.length) {
+        console.warn('Removed duplicate widgets during update:', updated.length - uniqueWidgets.length);
+      }
+
+      return uniqueWidgets;
+    });
   }, [widgets, currentSpace]);
 
   const handleDeleteWidget = useCallback(async (id: string) => {
-    // Delete via storage layer
-    await storage.deleteWidget(id);
+    console.log('Deleting widget:', id);
 
-    // Update local state
-    setWidgets(prevWidgets => prevWidgets.filter(w => w.id !== id));
+    // Delete via storage layer (handles both local and remote deletion)
+    const success = await storage.deleteWidget(id);
+
+    if (success) {
+      // Update local state immediately to reflect deletion
+      setWidgets(prevWidgets => {
+        const filtered = prevWidgets.filter(w => w.id !== id);
+        console.log(`Widget ${id} deleted. Widgets remaining:`, filtered.length);
+        return filtered;
+      });
+    } else {
+      console.error('Failed to delete widget:', id);
+    }
   }, []);
 
   const handleUpdateSpaceEmoji = useCallback(async (spaceId: string, emoji: string) => {

@@ -249,8 +249,8 @@ export class RobustStorage {
     if (this.isOnline && await supabaseService.isAuthenticated()) {
       try {
         const remoteWidgets = await supabaseService.getWidgetsBySpace(spaceId);
-        // Update local cache
-        this.saveWidgetsLocal(remoteWidgets);
+        // Merge remote widgets with local widgets to avoid duplicates
+        this.mergeWidgetsIntoLocal(remoteWidgets);
         return remoteWidgets;
       } catch (error) {
         console.warn('Failed to fetch widgets from server, using local cache:', error);
@@ -259,6 +259,25 @@ export class RobustStorage {
 
     // Fallback to localStorage (filter by space)
     return this.getWidgetsLocal().filter(w => w.spaceId === spaceId);
+  }
+
+  // Merge remote widgets into local storage without creating duplicates
+  private mergeWidgetsIntoLocal(remoteWidgets: WidgetData[]): void {
+    const localWidgets = this.getWidgetsLocal();
+    const mergedWidgets = [...localWidgets];
+
+    for (const remoteWidget of remoteWidgets) {
+      const existingIndex = mergedWidgets.findIndex(w => w.id === remoteWidget.id);
+      if (existingIndex >= 0) {
+        // Update existing widget with remote version (server wins for conflicts)
+        mergedWidgets[existingIndex] = { ...remoteWidget, spaceId: remoteWidget.spaceId };
+      } else {
+        // Add new widget from remote
+        mergedWidgets.push({ ...remoteWidget, spaceId: remoteWidget.spaceId });
+      }
+    }
+
+    this.saveWidgetsLocal(mergedWidgets);
   }
 
   async getWidget(widgetId: string, spaceId: string): Promise<WidgetData | null> {
